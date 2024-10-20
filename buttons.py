@@ -17,7 +17,7 @@ import os
 load_dotenv()
 
 # загружаем токен бота
-TOKEN =  os.environ.get("УКАЖИТЕ ВАШ ТОКЕН ИЗ .env") # ВАЖНО !!!!!
+TOKEN =  os.environ.get("TOKEN") # ВАЖНО !!!!!
 
 
 # функция команды /start

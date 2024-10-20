@@ -11,7 +11,7 @@ load_dotenv()
 TOKEN =  os.environ.get("TOKEN") # ВАЖНО !!!!!
 
 # инициализируем класс YOLO
-WORK_DIR = r'F:\Create_bot_OD'
+WORK_DIR = r'/media/andrey/Work/Обучение программированию/Нейросети и питон/УИИ/Урок 20/Yolo_Bot'
 os.makedirs(WORK_DIR, exist_ok=True)
 yolov5 = TerraYoloV5(work_dir=WORK_DIR)
 
@@ -53,7 +53,9 @@ async def detection(update, context):
     test_dict['source'] = 'images'          # папка, в которую загружаются присланные в бота изображения
     # test_dict['conf'] = 0.85              # порог распознавания
     # test_dict['classes'] = '50 39'        # классы, которые будут распознаны
-
+    # 'img-size': 640,  # Размер изображения
+    # 'conf-thres': 0.25,  # Порог уверенности
+    # 'iou-thres': 0.45,  # Порог IoU
 
     # вызов функции detect из класса TerraYolo)
     yolov5.run(test_dict, exp_type='test') 

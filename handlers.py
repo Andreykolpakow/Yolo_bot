@@ -7,7 +7,7 @@ import os
 load_dotenv()
 
 # загружаем токен бота
-TOKEN =  os.environ.get("УКАЖИТЕ ВАШ ТОКЕН ИЗ .env") # ВАЖНО !!!!!
+TOKEN =  os.environ.get("TOKEN") # ВАЖНО !!!!!
 
 
 '''
@@ -25,7 +25,14 @@ async def text(update, context):
 
 # функция для изображений
 async def image(update, context):
-    await update.message.reply_text('Эй! Мы получили от тебя фотографию!')
+    # # мой кусок кода
+    # len_photo_file = len(update.message.photo)
+    # # Получаем наименьшую версию фото
+    # smallest_photo = update.message.photo[0]  # Индекс 0 для самой маленькой версии
+    # # Отправляем наименьшую версию фото обратно пользователю
+    # await context.bot.send_photo(chat_id=update.effective_chat.id, photo=smallest_photo.file_id)
+    # # Закончился эксперимент
+    await update.message.reply_text('Эй! Мы получили от тебя фото!')
 
 # функция для голосовых сообщений
 async def voice(update, context):
