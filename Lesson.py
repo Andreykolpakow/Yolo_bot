@@ -1,14 +1,22 @@
+# Перед запуском требуется:
+# source myenv/bin/activate
+# pip install torch
+# pip install ultralytics
+
+
 from telegram.ext import Application, CommandHandler, MessageHandler, filters
 from dotenv import load_dotenv
 import os
 import shutil
 from TerraYolo.TerraYolo import TerraYoloV5             # загружаем фреймворк TerraYolo
+# import torch
 
 # возьмем переменные окружения из .env
 load_dotenv()
 
 # загружаем токен бота
 TOKEN =  os.environ.get("TOKEN") # ВАЖНО !!!!!
+  
 
 # инициализируем класс YOLO
 WORK_DIR = r'/home/andrey/Bots/Yolo_Bot'
@@ -24,7 +32,9 @@ async def start(update, context):
 async def help(update, context):
     await update.message.reply_text(update)
 
-
+# Задаём значения для переборов
+conf_list = [0.01, 0.5, 0.99]
+iou_list = [0.01, 0.5, 0.99]
 
 # функция обработки изображения
 async def detection(update, context):
@@ -46,27 +56,39 @@ async def detection(update, context):
     # скачиваем файл с сервера Telegram в папку images
     await new_file.download_to_drive(image_path)
 
-    # создаем словарь с параметрами
-    test_dict = dict()
-    test_dict['weights'] = 'yolov5x.pt'     # Самые сильные веса yolov5x.pt, вы также можете загрузить версии: yolov5n.pt, yolov5s.pt, yolov5m.pt, yolov5l.pt (в порядке возрастания)
+    i = 0
+    exp_num = 1
 
-    test_dict['source'] = 'images'          # папка, в которую загружаются присланные в бота изображения
-    # test_dict['conf'] = 0.85              # порог распознавания
-    # test_dict['classes'] = '50 39'        # классы, которые будут распознаны
-    # 'img-size': 640,  # Размер изображения
-    # 'conf-thres': 0.25,  # Порог уверенности
-    # 'iou-thres': 0.45,  # Порог IoU
+    # Запускаем цикл распознаваний
+    for conf in conf_list:
+        for iou in iou_list:
+            # создаем словарь с параметрами
+            test_dict = dict()
+            test_dict['weights'] = 'yolov5x.pt'     # Самые сильные веса yolov5x.pt, вы также можете загрузить версии: yolov5n.pt, yolov5s.pt, yolov5m.pt, yolov5l.pt (в порядке возрастания)
 
-    # вызов функции detect из класса TerraYolo)
-    yolov5.run(test_dict, exp_type='test') 
+            test_dict['source'] = 'images'          # папка, в которую загружаются присланные в бота изображения
+            test_dict['conf'] = conf                # порог распознавания
+            test_dict['classes'] = '0 2'        # классы, которые будут распознаны
+            # 'img-size': 640,  # Размер изображения
+            # 'conf-thres': 0.25,  # Порог уверенности
+            test_dict['iou-thres'] = iou  # Порог IoU
 
-    # удаляем предыдущее сообщение от бота
-    await context.bot.deleteMessage(message_id = my_message.message_id, # если не указать message_id, то удаляется последнее сообщение
-                                    chat_id = update.message.chat_id) # если не указать chat_id, то удаляется последнее сообщение
+            # вызов функции detect из класса TerraYolo)
+            yolov5.run(test_dict, exp_type='test')
 
-    # отправляем пользователю результат
-    await update.message.reply_text('Распознавание объектов завершено') # отправляем пользователю результат 
-    await update.message.reply_photo(f"{WORK_DIR}/yolov5/runs/detect/exp/{image_name}") # отправляем пользователю результат изображение
+            
+            # удаляем предыдущее сообщение от бота
+            # print('my_message = ', my_message)
+            # await update.message.reply_text(f'my_message = {my_message}')
+            if i < 1:
+                await context.bot.deleteMessage(message_id = my_message.message_id, # если не указать message_id, то удаляется последнее сообщение
+                                                chat_id = update.message.chat_id) # если не указать chat_id, то удаляется последнее сообщение
+                i += 1
+
+            # отправляем пользователю результат
+            await update.message.reply_text(f'Распознавание объектов с достоверностью {conf} и пересечением {iou} завершено') # отправляем пользователю результат 
+            await update.message.reply_photo(f"{WORK_DIR}/yolov5/runs/detect/exp{exp_num if exp_num > 1 else ''}/{image_name}") # отправляем пользователю результат изображение
+            exp_num += 1
 
 
 
